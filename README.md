@@ -6,7 +6,7 @@
 
 # STM32F303RE Embassy Blink Driver
 
-Async LED blink firmware for STM32F303RE Nucleo in Embedded Rust with Embassy; leverages STM32F303RE (ARM Cortex-M4F) for reliable GPIO control plus integrated UART output and robust capabilities.
+Embedded Rust w/ Embassy blink driver.
 
 ## Required Hardware
 
