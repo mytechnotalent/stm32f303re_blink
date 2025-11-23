@@ -1,0 +1,1 @@
+/Users/kevinthomas/Desktop/stm32f303re/target/thumbv7em-none-eabihf/debug/stm32f303re-blink: /Users/kevinthomas/Desktop/stm32f303re/build.rs /Users/kevinthomas/Desktop/stm32f303re/memory.x /Users/kevinthomas/Desktop/stm32f303re/src/config.rs /Users/kevinthomas/Desktop/stm32f303re/src/main.rs

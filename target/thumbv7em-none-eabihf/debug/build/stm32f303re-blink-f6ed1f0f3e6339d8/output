@@ -1,0 +1,2 @@
+cargo:rustc-link-search=/Users/kevinthomas/Desktop/stm32f303re/target/thumbv7em-none-eabihf/debug/build/stm32f303re-blink-f6ed1f0f3e6339d8/out
+cargo:rerun-if-changed=memory.x
