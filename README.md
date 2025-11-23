@@ -77,6 +77,19 @@ Adjust the flash address (`0x08000000` or `0x8000000` depending on the tool) to 
 - `probe-run` provides a convenient run-and-debug experience using probe-rs. For advanced debugging, use `gdb` via `probe-rs` or `openocd` with an ST-Link.
 - If you need RTT logs, the project already depends on `defmt`/`defmt-rtt` — use `defmt-print`/`probe-run` to capture logs.
 
+**Generate API docs (local)**
+
+To build the crate documentation (including private items and your pro docstrings) and open it in your browser:
+
+```bash
+cargo doc --no-deps --document-private-items --open
+```
+
+Notes:
+- `--no-deps` prevents building docs for all dependencies (useful for embedded deps that may not doc-build on the host).
+- `--document-private-items` includes private items and internal docstrings so you can inspect implementation details.
+- The generated files live under `target/<target-triple>/doc/stm32f303re_blink` (or `target/doc` for host builds).
+
 **Contributing**
 - Keep examples minimal and focused.
 - Prefer reproducible tool versions (document changes to toolchain or `Cargo.toml`).
