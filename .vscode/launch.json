@@ -17,7 +17,7 @@
             "svdFile": "",
             "preLaunchTask": "cargo: build (thumbv7em-none-eabihf)",
             "gdbPath": "arm-none-eabi-gdb",
-            "showDevDebugOutput": "vscode",
+            "showDevDebugOutput": "none",
             "postLaunchCommands": [
                 "set output-radix 16"
             ]
