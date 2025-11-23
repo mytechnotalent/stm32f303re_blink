@@ -25,6 +25,7 @@
 
 mod config;
 
+use crate::config::WriteBlocking;
 use embassy_executor::Spawner;
 use embassy_time::Timer;
 use {defmt_rtt as _, panic_probe as _};
@@ -49,18 +50,18 @@ async fn main(_spawner: Spawner) {
     let p = embassy_stm32::init(Default::default());
 
     // Initialize hardware (LED and UART)
-    let mut hw = config::Hardware::init(p);
+    let (mut led, mut usart) = config::init(p);
 
     // Main application loop - blink LED and send UART messages
     loop {
         // Turn LED on and notify via UART
-        let _ = hw.usart.blocking_write(config::messages::LED_ON);
-        hw.led.set_high();
+        let _ = usart.blocking_write(config::messages::LED_ON);
+        led.set_high();
         Timer::after_millis(config::LED_BLINK_INTERVAL_MS).await;
 
         // Turn LED off and notify via UART
-        let _ = hw.usart.blocking_write(config::messages::LED_OFF);
-        hw.led.set_low();
+        let _ = usart.blocking_write(config::messages::LED_OFF);
+        led.set_low();
         Timer::after_millis(config::LED_BLINK_INTERVAL_MS).await;
     }
 }

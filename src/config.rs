@@ -12,7 +12,22 @@
 
 use embassy_stm32::gpio::{Level, Output, Speed};
 use embassy_stm32::usart::UartTx;
-use embassy_stm32::Peripherals;
+use embassy_stm32::{mode::Blocking, Peripherals};
+
+/// Small trait to abstract a blocking-write-capable UART transmitter.
+///
+/// We define a local trait and implement it for the concrete `UartTx` type
+/// so the public API avoids exposing newer/unstable generic parameters.
+pub trait WriteBlocking {
+    fn blocking_write(&mut self, bytes: &[u8]) -> Result<(), ()>;
+}
+
+impl WriteBlocking for UartTx<'static, Blocking> {
+    fn blocking_write(&mut self, bytes: &[u8]) -> Result<(), ()> {
+        // Use the inherent blocking_write method provided by the blocking UartTx
+        self.blocking_write(bytes).map_err(|_| ())
+    }
+}
 
 /// LED blink interval in milliseconds
 ///
@@ -45,46 +60,19 @@ pub mod messages {
 /// # Fields
 /// * `led` - GPIO output for the onboard LED (PA5)
 /// * `usart` - UART transmitter for serial communication (USART2)
-pub struct Hardware {
-    /// Onboard LED (LD2) - Green LED on PA5
-    pub led: Output<'static, embassy_stm32::peripherals::PA5>,
+///
+/// Returns an initialized LED `Output` and a blocking-write capable UART transmitter.
+pub fn init(p: Peripherals) -> (Output<'static>, impl WriteBlocking) {
+    // Initialize UART2 TX (connected to ST-Link VCP on PA2)
+    // Configuration: 115200 baud, 8 data bits, no parity, 1 stop bit (8N1)
+    let uart_config = embassy_stm32::usart::Config::default();
+    // Create a blocking UART transmitter (no DMA) using the convenience constructor
+    let usart = UartTx::new_blocking(p.USART2, p.PA2, uart_config).unwrap();
 
-    /// UART2 transmitter connected to ST-Link virtual COM port
-    #[allow(dead_code)]
-    pub usart: UartTx<'static, embassy_stm32::peripherals::USART2, embassy_stm32::dma::NoDma>,
-}
+    // Configure PA5 as push-pull output for the onboard LED (LD2)
+    // Initial state: LOW (LED off), Speed: Low (2MHz slew rate)
+    let led = Output::new(p.PA5, Level::Low, Speed::Low);
 
-impl Hardware {
-    /// Initialize and configure all hardware peripherals
-    ///
-    /// Sets up:
-    /// - USART2 on PA2 (TX) with default configuration (115200 baud, 8N1)
-    /// - GPIO PA5 as push-pull output for LED control (initially LOW)
-    ///
-    /// # Arguments
-    /// * `p` - STM32 peripheral singleton from embassy_stm32
-    ///
-    /// # Returns
-    /// Initialized `Hardware` struct with configured peripherals
-    ///
-    /// # Panics
-    /// Panics if UART initialization fails (unwrap on UART creation)
-    ///
-    /// # Hardware Details
-    /// - USART2 is connected to the ST-Link virtual COM port on Nucleo boards
-    /// - PA5 drives the green user LED (LD2) on the Nucleo-F303RE
-    /// - No DMA is used for UART (polling mode via blocking_write)
-    pub fn init(p: Peripherals) -> Self {
-        // Initialize UART2 TX (connected to ST-Link VCP on PA2)
-        // Configuration: 115200 baud, 8 data bits, no parity, 1 stop bit (8N1)
-        let uart_config = embassy_stm32::usart::Config::default();
-        let usart = UartTx::new(p.USART2, p.PA2, embassy_stm32::dma::NoDma, uart_config).unwrap();
-
-        // Configure PA5 as push-pull output for the onboard LED (LD2)
-        // Initial state: LOW (LED off), Speed: Low (2MHz slew rate)
-        let led = Output::new(p.PA5, Level::Low, Speed::Low);
-
-        // Return the initialized hardware struct
-        Self { led, usart }
-    }
+    // Return initialized peripherals
+    (led, usart)
 }
