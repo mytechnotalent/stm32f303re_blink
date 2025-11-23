@@ -1,6 +1,6 @@
 # stm32f303re-blink
 
-STM32F303RE blink driver in RUST.
+STM32F303RE: Blink LED Driver using Embassy (Rust, async/embedded).
 
 **Project**
 - **Name:** `stm32f303re-blink` (crate version `0.1.0`)
